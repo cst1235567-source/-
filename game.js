@@ -385,6 +385,7 @@ function flap() {
 
   if (state === 'playing') {
     hero.vy = currentLevel().flap;
+    playFlapSound();
   }
 }
 
@@ -496,6 +497,69 @@ function updateAudioLevel() {
   const level = currentLevel();
   audio.windFilter.frequency.setTargetAtTime(level.music.filter, audio.ctx.currentTime, 0.3);
   audio.windGain.gain.setTargetAtTime(level.music.windGain, audio.ctx.currentTime, 0.4);
+}
+
+function playFlapSound() {
+  if (!audio.ctx || audio.muted) return;
+
+  const now = audio.ctx.currentTime;
+  const gain = audio.ctx.createGain();
+  const osc = audio.ctx.createOscillator();
+  const filter = audio.ctx.createBiquadFilter();
+
+  filter.type = 'highpass';
+  filter.frequency.setValueAtTime(420, now);
+
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(760, now);
+  osc.frequency.exponentialRampToValueAtTime(420, now + 0.11);
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(0.055, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(audio.master);
+
+  osc.start(now);
+  osc.stop(now + 0.15);
+}
+
+function playScoreSound() {
+  if (!audio.ctx || audio.muted) return;
+
+  const now = audio.ctx.currentTime;
+  const leadGain = audio.ctx.createGain();
+  const leadOsc = audio.ctx.createOscillator();
+  const sparkleGain = audio.ctx.createGain();
+  const sparkleOsc = audio.ctx.createOscillator();
+
+  leadOsc.type = 'sine';
+  sparkleOsc.type = 'triangle';
+
+  leadOsc.frequency.setValueAtTime(740, now);
+  leadOsc.frequency.exponentialRampToValueAtTime(980, now + 0.16);
+  sparkleOsc.frequency.setValueAtTime(1110, now + 0.02);
+  sparkleOsc.frequency.exponentialRampToValueAtTime(1480, now + 0.18);
+
+  leadGain.gain.setValueAtTime(0.0001, now);
+  leadGain.gain.linearRampToValueAtTime(0.05, now + 0.02);
+  leadGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+
+  sparkleGain.gain.setValueAtTime(0.0001, now + 0.02);
+  sparkleGain.gain.linearRampToValueAtTime(0.032, now + 0.05);
+  sparkleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+
+  leadOsc.connect(leadGain);
+  sparkleOsc.connect(sparkleGain);
+  leadGain.connect(audio.master);
+  sparkleGain.connect(audio.master);
+
+  leadOsc.start(now);
+  sparkleOsc.start(now + 0.02);
+  leadOsc.stop(now + 0.24);
+  sparkleOsc.stop(now + 0.26);
 }
 
 function schedulePad(frequency, time, level) {
@@ -674,6 +738,7 @@ function updateGame(dt) {
     if (!pipe.passed && pipe.x + PIPE_WIDTH < hero.x) {
       pipe.passed = true;
       score += 1;
+      playScoreSound();
       if (score > best) {
         best = score;
         safeStorageSet('fb_best', String(best));
