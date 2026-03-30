@@ -1,3 +1,15 @@
+:root {
+  --bg-start: #fff5d6;
+  --bg-end: #ffd6e8;
+  --bg-accent: rgba(255, 255, 255, 0.75);
+  --canvas-edge: rgba(255, 183, 213, 0.7);
+  --canvas-fill: #fffdf8;
+  --canvas-shadow: 0 20px 70px rgba(255, 170, 200, 0.5);
+  --canvas-glow: 0 0 0 2px rgba(255, 255, 255, 0.65) inset;
+  --canvas-radius: 26px;
+  --ui-font: "Trebuchet MS", "Gill Sans", system-ui, sans-serif;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -5,20 +17,24 @@
 }
 
 body {
-  background: #0a0a1a;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
   overflow: hidden;
-  font-family: 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at top, var(--bg-accent), transparent 38%),
+    linear-gradient(180deg, var(--bg-start), var(--bg-end));
+  font-family: var(--ui-font);
 }
 
 canvas {
   display: block;
-  border-radius: 12px;
-  box-shadow: 0 0 60px rgba(243, 156, 18, 0.25), 0 0 120px rgba(243, 156, 18, 0.1);
-  cursor: pointer;
   max-width: 100vw;
   max-height: 100vh;
+  cursor: pointer;
+  background: var(--canvas-fill);
+  border-radius: var(--canvas-radius);
+  border: 1px solid var(--canvas-edge);
+  box-shadow: var(--canvas-shadow), var(--canvas-glow);
 }
